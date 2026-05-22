@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d2b1a">
+<title>Aventures Défis — Kourou</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --vert:#1a7a4a;--vert-c:#2ab06a;--vert-bg:#e8f5ee;
+  --or:#e8a020;--or-bg:#fef3dc;
+  --rouge:#d63030;--rouge-bg:#fdeaea;
+  --bleu:#1a6aaa;--bleu-bg:#e8f0fa;
+  --violet:#6a3aaa;--violet-bg:#f0eafa;
+  --gris:#f2f2f0;--gris-b:#d8d8d4;
+  --txt:#1a1a18;--txt2:#5a5a55;
+  --r:16px;
+  /* Safe areas pour iPhone encoche + Android */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;height:-webkit-fill-available}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#0d2b1a;
+  min-height:100vh;
+  min-height:-webkit-fill-available;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+}
+
+/* ── Conteneur principal : prend tout l'écran ── */
+.phone{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  min-height:-webkit-fill-available;
+  background:#f5f5f0;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+
+/* ── ÉCRANS ── */
+.screen{display:none;flex-direction:column;flex:1;min-height:100vh;min-height:-webkit-fill-available}
+.screen.active{display:flex}
+
+/* ══════════ ACCUEIL / BRIEFING ══════════ */
+#sc-home{
+  background:linear-gradient(160deg,#0a2518,#1a5c35 55%,#0d3020);
+  align-items:center;
+  justify-content:flex-start;
+  padding:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.home-hero{
+  width:100%;
+  padding-top:calc(var(--sat) + 52px);
+  padding-left:24px;
+  padding-right:24px;
+  padding-bottom:24px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.home-logo{width:80px;height:80px;background:var(--or);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:42px;margin-bottom:18px;box-shadow:0 8px 32px rgba(232,160,32,.45)}
+.home-titre{font-size:24px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px}
+.home-sous{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px}
+.briefing-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:var(--r);padding:18px;margin:0 16px 14px;color:#fff}
+.briefing-titre{font-size:12px;font-weight:700;color:var(--or);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.briefing-texte{font-size:14px;line-height:1.65;color:rgba(255,255,255,.85)}
+.mat-list{margin-top:8px;list-style:none;display:flex;flex-direction:column;gap:5px}
+.mat-list li{font-size:13px;color:rgba(255,255,255,.82);padding:7px 10px;background:rgba(255,255,255,.07);border-radius:8px;display:flex;align-items:center;gap:8px}
+.sos-info{background:rgba(214,48,48,.14);border:1px solid rgba(214,48,48,.38);border-radius:var(--r);padding:14px;margin:0 16px 14px;color:#fff}
+.sos-info-titre{font-size:12px;font-weight:700;color:#ff8888;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sos-info-txt{font-size:13px;color:rgba(255,255,255,.82);line-height:1.6}
+.btn-start{
+  margin:4px 16px calc(var(--sab) + 28px);
+  background:var(--or);color:#1a1a00;border:none;
+  border-radius:16px;padding:18px;font-size:17px;font-weight:800;
+  cursor:pointer;box-shadow:0 8px 28px rgba(232,160,32,.5);
+  transition:transform .1s;text-align:center;
+}
+.btn-start:active{transform:scale(.97)}
+
+/* ══════════ HEADER JEU — tient compte de l'encoche ══════════ */
+.app-header{
+  background:#1a7a4a;
+  /* padding-top = hauteur barre statut + espace visuel */
+  padding-top:calc(var(--sat) + 14px);
+  padding-left:calc(var(--sal) + 14px);
+  padding-right:calc(var(--sar) + 14px);
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+  position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.h-logo{font-size:22px}
+.h-titre{font-size:15px;font-weight:700;color:#fff;flex:1}
+.h-etape{
+  background:rgba(255,255,255,.18);color:#fff;
+  border-radius:20px;padding:5px 11px;font-size:11px;font-weight:700;
+}
+.sos-btn{
+  background:var(--rouge);color:#fff;
+  border:none;border-radius:10px;
+  padding:8px 12px;font-size:12px;font-weight:800;
+  cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(214,48,48,.4);
+}
+.sos-btn:active{transform:scale(.94)}
+
+/* ══════════ PROGRESSION ══════════ */
+.prog-wrap{
+  background:#fff;
+  padding:10px calc(var(--sal)+14px) 12px calc(var(--sar)+14px);
+  border-bottom:1px solid var(--gris-b);flex-shrink:0;
+}
+.prog-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);margin-bottom:7px}
+.prog-track{height:6px;background:var(--gris);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--vert-c);border-radius:3px;transition:width .5s ease}
+.prog-dots{display:flex;gap:6px;margin-top:8px;justify-content:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gris-b);transition:all .3s}
+.dot.done{background:var(--vert-c)}
+.dot.active{background:var(--or);width:20px;border-radius:4px}
+
+/* ══════════ CONTENU ══════════ */
+.content{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(var(--sab) + 24px);
+  display:flex;flex-direction:column;gap:12px;
+}
+
+/* ══════════ MODAL OVERLAY ══════════ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.72);z-index:100;
+  align-items:flex-end;justify-content:center;
+  padding:0;
+}
+.modal-overlay.show{display:flex}
+.modal-box{
+  background:#fff;
+  border-radius:24px 24px 0 0;
+  padding:28px 22px calc(var(--sab) + 24px);
+  width:100%;max-width:480px;
+  text-align:center;
+  box-shadow:0 -8px 40px rgba(0,0,0,.25);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-ico{font-size:56px;margin-bottom:12px}
+.modal-titre{font-size:20px;font-weight:800;color:var(--txt);margin-bottom:10px;line-height:1.3}
+.modal-texte{font-size:15px;color:var(--txt2);line-height:1.7;margin-bottom:22px}
+.modal-btn{
+  background:var(--vert);color:#fff;border:none;
+  border-radius:14px;padding:17px 24px;
+  font-size:17px;font-weight:800;cursor:pointer;width:100%;
+  transition:transform .1s;
+}
+.modal-btn:active{transform:scale(.97)}
+.modal-btn.or{background:var(--or);color:#1a1a00}
+.modal-btn.rouge{background:var(--rouge);color:#fff}
+.modal-gap{margin-top:10px}
+
+/* ══════════ DISTANCE CARD ══════════ */
+.dist-card{background:linear-gradient(135deg,#0d3320,#1a5c35);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.dist-ico{font-size:28px}
+.dist-val{font-size:26px;font-weight:800;color:var(--or);line-height:1}
+.dist-lbl{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+
+/* ══════════ MISSION CARD ══════════ */
+.mission-card{background:#fff;border-radius:var(--r);border:1px solid var(--gris-b);overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,.08)}
+.mc-header{padding:14px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gris)}
+.mc-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.mc-titre{font-size:15px;font-weight:700;color:var(--txt);line-height:1.3}
+.mc-body{padding:14px 16px}
+.mc-texte{font-size:15px;color:var(--txt);line-height:1.65;font-style:italic}
+
+/* ══════════ GPS BADGE ══════════ */
+.gps-badge{display:flex;align-items:center;gap:8px;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;margin-top:12px;border:1px solid}
+.gps-ok{background:var(--vert-bg);border-color:#a8ddb8;color:var(--vert)}
+.gps-wait{background:var(--or-bg);border-color:#f0c870;color:#7a4e00}
+
+/* ══════════ INPUTS & BOUTONS ══════════ */
+.input-section{margin-top:12px}
+.input-lbl{font-size:12px;font-weight:700;color:var(--txt2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.input-row{display:flex;gap:8px}
+.mot-input{flex:1;border:2px solid var(--gris-b);border-radius:12px;padding:13px 13px;font-size:16px;font-weight:700;color:var(--txt);background:var(--gris);text-transform:uppercase;outline:none;transition:border-color .2s}
+.mot-input:focus{border-color:var(--vert-c);background:#fff}
+.mot-input.err{border-color:var(--rouge);animation:shake .3s}
+.mot-input.ok{border-color:var(--vert-c);background:var(--vert-bg)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.btn{border:none;border-radius:12px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:9px}
+.btn:active{transform:scale(.96)}
+.btn-vert{background:var(--vert);color:#fff}
+.btn-ok{background:var(--vert);color:#fff;padding:13px 14px;font-size:20px;margin-top:0;width:auto;flex-shrink:0}
+.btn-qr{background:var(--bleu);color:#fff}
+.btn-or{background:var(--or);color:#1a1a00}
+.btn-audio{background:var(--or-bg);color:#7a4e00;border:1px solid #f0c870}
+
+.qr-scanner{display:none;background:#111;border-radius:var(--r);aspect-ratio:1;align-items:center;justify-content:center;flex-direction:column;gap:10px;overflow:hidden;margin-top:10px}
+.qr-scanner.show{display:flex}
+.qr-frame{width:140px;height:140px;border:3px solid var(--or);border-radius:10px;position:relative}
+.qr-line{position:absolute;top:0;left:0;right:0;height:3px;background:var(--or);animation:scan 2s linear infinite}
+@keyframes scan{0%{top:0}50%{top:100%}100%{top:0}}
+.qr-lbl{color:rgba(255,255,255,.7);font-size:12px}
+.qr-manual{display:none;margin-top:8px}
+.qr-manual.show{display:block}
+
+/* ══════════ PHOTO CARD ══════════ */
+.photo-card{background:linear-gradient(135deg,#1a3a6a,#2a5aaa);border-radius:var(--r);padding:16px;text-align:center}
+.photo-emoji{font-size:40px;margin-bottom:8px}
+.photo-titre{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
+.photo-texte{font-size:14px;color:rgba(255,255,255,.8);line-height:1.5}
+
+/* ══════════ SOS SECOURS ══════════ */
+.sos-card{background:var(--rouge-bg);border:1.5px solid #f0a0a0;border-radius:var(--r);padding:14px 16px;display:none}
+.sos-card.show{display:block}
+.sos-titre{font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sos-texte{font-size:13px;color:#8a2020;line-height:1.5}
+
+/* ══════════ VICTOIRE ══════════ */
+#sc-victoire{
+  background:linear-gradient(160deg,#0d3320,#1a5c35,#0f4028);
+  align-items:center;justify-content:center;
+  padding:calc(var(--sat)+32px) 24px calc(var(--sab)+32px);
+  text-align:center;overflow-y:auto;
+}
+.v-fire{font-size:64px;margin-bottom:16px;animation:bounce .6s ease infinite alternate}
+@keyframes bounce{from{transform:scale(1)}to{transform:scale(1.1)}}
+.v-titre{font-size:28px;font-weight:800;color:var(--or);margin-bottom:8px}
+.v-sous{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:24px;line-height:1.55}
+.tresor-box{background:rgba(232,160,32,.15);border:2px solid var(--or);border-radius:var(--r);padding:20px 18px;margin-bottom:20px;width:100%}
+.tresor-lbl{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px}
+.tresor-msg{font-size:18px;font-weight:700;color:#fff;line-height:1.5}
+.btn-restart{width:100%;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* ══════════ UTILS ══════════ */
+.dot-gps{width:8px;height:8px;border-radius:50%;background:var(--vert-c);display:inline-block;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.coords-box{background:var(--gris);border-radius:8px;padding:7px 11px;font-size:10px;font-family:monospace;color:var(--txt2);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ══════════════════════════════════
+     ACCUEIL / BRIEFING
+══════════════════════════════════ -->
+<div id="sc-home" class="screen active">
+  <div class="home-hero">
+    <div class="home-logo">🌿</div>
+    <h1 class="home-titre">Aventures Défis<br>Guyane 🇬🇫</h1>
+    <p class="home-sous">De Kourou jusqu'a où?</p>
+  </div>
+
+  <div class="briefing-card">
+    <div class="briefing-titre">🗺 Le principe</div>
+    <div class="briefing-texte">Bienvenue dans votre chasse au trésor guyanaise ! Vous allez parcourir plusieurs km, en voiture et a pied, à travers Kourou et la forêt. L'application vous guide étape par étape grâce aux énigmes et au GPS de votre téléphone — <strong>sans réseau, 100% hors-ligne</strong>. À chaque point d'intérêt, une mission vous attend : photo souvenir, énigme, QR code à scanner… Toutes les preuves doivent être envoyé à Cécile</div>
+  </div>
+
+  <div class="briefing-card">
+    <div class="briefing-titre">🎒 Matériel conseillé</div>
+    <ul class="mat-list">
+      <li>📱 Téléphone chargé (GPS activé)</li>
+      <li>🔋 Batterie externe / chargeur voiture</li>
+      <li>💛 Accessoire fluo (bracelet, bandana…)</li>
+      <li>🧢 Chapeau ou casquette</li>
+      <li>👟 Chaussures de marche / baskets</li>
+      <li>🩱 Maillot de bain (surprise en fin de route !)</li>
+      <li>💧 Eau fraîche pour tout le monde</li>
+      <li>📷 Appareil photo ou téléphone chargé</li>
+      <li>😎 Bonne humeur obligatoire !</li>
+    </ul>
+  </div>
+
+  <div class="sos-info">
+    <div class="sos-info-titre">🆘 Bouton SOS "Bouteille à la mer"</div>
+    <div class="sos-info-txt">Ce parcours s'effectue en <strong>totale autonomie</strong> — aucun réseau cellulaire disponible sur la route. Si vous êtes bloqués sur une étape, le bouton <strong>SOS 🆘</strong> (en haut à droite pendant le jeu) vous permet de passer à l'étape suivante pour être sûrs d'arriver à bon port. Utilisez-le en dernier recours !</div>
+  </div>
+
+  <button class="btn-start" onclick="demarrer()">✅ J'ai compris — Démarrer l'aventure !</button>
+</div>
+
+<!-- ══════════════════════════════════
+     JEU
+══════════════════════════════════ -->
+<div id="sc-jeu" class="screen">
+  <div class="app-header">
+    <span class="h-logo">🌿</span>
+    <span class="h-titre">Aventures Défis</span>
+    <span class="h-etape" id="lbl-etape">Mission 1</span>
+    <button class="sos-btn" onclick="confirmerSOS()">🆘 SOS</button>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-lbl">
+      <span id="pg-g">En route…</span>
+      <span id="pg-d">0 pts</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="pg-fill" style="width:0%"></div></div>
+    <div class="prog-dots" id="pg-dots"></div>
+  </div>
+  <div class="content" id="content-jeu"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     VICTOIRE
+══════════════════════════════════ -->
+<div id="sc-victoire" class="screen">
+  <div class="v-fire">🎉</div>
+  <div class="v-titre">YES ! On y est !</div>
+  <div class="v-sous">Vous avez traversé la forêt guyanaise<br>et atteint la Crique Parforce !<br>Regardez autour de vous 👀</div>
+  <div class="tresor-box">
+    <div class="tresor-lbl">🗝 Message final</div>
+    <div class="tresor-msg">YES BRAVO — REGARDEZ ON VOUS VOIT,<br>ON EST JUSTE LÀ 😄</div>
+  </div>
+  <button class="btn-restart" onclick="reinit()">↩ Recommencer</button>
+</div>
+
+<!-- ══════════════════════════════════
+     MODALS
+══════════════════════════════════ -->
+
+<!-- Modal action générique -->
+<div class="modal-overlay" id="modal-action">
+  <div class="modal-box">
+    <div class="modal-ico" id="ma-ico">📸</div>
+    <div class="modal-titre" id="ma-titre"></div>
+    <div class="modal-texte" id="ma-texte"></div>
+    <button class="modal-btn or" id="ma-btn" onclick="fermerModal('modal-action')">OK, on continue !</button>
+  </div>
+</div>
+
+<!-- Modal SOS confirmation -->
+<div class="modal-overlay" id="modal-sos">
+  <div class="modal-box">
+    <div class="modal-ico">🆘</div>
+    <div class="modal-titre">Bouteille à la mer</div>
+    <div class="modal-texte">Vous êtes bloqués ? Pas de panique ! Cette action va passer à l'étape suivante sans points bonus. Utilisez-le seulement si nécessaire.</div>
+    <button class="modal-btn rouge" onclick="activerSOS()">Oui, passer à la suite</button>
+    <button class="modal-btn modal-gap" onclick="fermerModal('modal-sos')">Non, on cherche encore !</button>
+  </div>
+</div>
+
+<!-- Modal QR action -->
+<div class="modal-overlay" id="modal-qr-action">
+  <div class="modal-box">
+    <div class="modal-ico" id="mqa-ico">✅</div>
+    <div class="modal-titre" id="mqa-titre"></div>
+    <div class="modal-texte" id="mqa-texte"></div>
+    <button class="modal-btn or" id="mqa-btn" onclick="fermerModalQRAction()">OK !</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONVERSIONS DMS → DD
+//  5°09'46.84"N 52°38'08.12"W → 5.16301, -52.63559
+//  5°06'08.77"N 52°42'08.04"W → 5.10244, -52.70223
+// ═══════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════
+//  PARCOURS
+// ═══════════════════════════════════════════════
+const MISSIONS = [
+
+  // ── M0 : DÉPART + COCOTERAIE ────────────────
+  {
+    id:"m0", num:0,
+    couleur:"#1a7a4a",
+    titre:"Mission 1",
+    sousTitre:"Allez à la cocoteraie car… I love you 💚",
+    texte:"Votre première mission vous emmène vers un endroit où les palmiers règnent en maîtres. Cherchez la cocoteraie! Rapprochez vous à pied au plus près avec votre accessoire fluo.",
+    tts:"Mission numéro un ! Allez à la cocoteraie car I love you ! Gardez les yeux et le coeur ouverts.",
+    action:{
+      type:"geofence_puis_modal",
+      lat:5.163553, lon:-52.635722, rayonM:40,
+      modal:{
+        ico:"💋",
+        titre:"Vous êtes à la cocoteraie !",
+        texte:"Prenez une photo avec votre accessoire FLUO en faisant un bisou dans le coeur ! 😘📸"
+      }
+    },
+    points:100
+  },
+
+  // ── M1 : TOUCAN (fou le camp) ───────────────
+  {
+    id:"m1", num:1,
+    couleur:"#1a6aaa",
+    titre:"Mission 2",
+    sousTitre:"You can fly… 🐦",
+    texte:"On tourne en rond autour… immobile, j'ai un long bec et un plumage noir. I believe I can fly, I believe To can fly.",
+    tts:"Mission deux ! Tout fou le camp ! On tourne en rond autour d'un oiseau immobile, Trouvez le QR code dans mon long bec ou mon plumage noir!",
+    action:{
+      type:"qr_code",
+      valeur:"TOUCAN",
+      modal:{
+        ico:"🎩",
+        titre:"QR Code scanné !",
+        texte:"Prenez votre chapeau pour faire une jolie photo. Envole-toi c'est samedi, lâche-toi ! 🧢📸"
+      }
+    },
+    points:120
+  },
+
+  // ── M2 : SCIERIE / FONTAINE ─────────────────
+  {
+    id:"m2", num:2,
+    couleur:"#7a4e00",
+    titre:"Mission 3",
+    sousTitre:"Il est temps d'avancer un peu",
+    texte:"Mon premier est 3 fois 2, mon deuxième est la conjugaison du verbe rire au présent de l'indicatif. Mon tout est un endroit ou on coupe le bois.",
+    tts:"Mission trois ! Mon premier est de 3 fois 2, mon deuxième est la conjugaison du verbe rire au présent de l'indicatif. Mon tout est un endroit ou on coupe le bois..",
+    action:{
+      type:"geofence_puis_modal",
+      lat:5.1377, lon:-52.7170, rayonM:60,
+      modal:{
+        ico:"🪵",
+        titre:"Et non, ce n'est pas encore l'heure de l'apéro !",
+        texte:"Ce bois-là ne se boit pas 😄 Alors restez sur les PK — encore 4 km pour faire un relais ! Continuez tout droit."
+      }
+    },
+    points:100
+  },
+
+  // ── INTERLUDE : RELAIS PK ────────────────────
+  {
+    id:"m2b", num:"2b",
+    couleur:"#1a6aaa",
+    titre:"Relais des PK",
+    sousTitre:"Continuez tout droit… 🚗",
+    texte:"Vous êtes sur la bonne route ! La forêt guyanaise vous entoure. Restez hydratés, un relais arrive bientôt…",
+    tts:"Vous y êtes presque, mais attention au coup de chaud !",
+    action:{
+      type:"geofence_puis_modal",
+      lat:5.10244, lon:-52.70223, rayonM:80,
+      modal:{
+        ico:"🥤",
+        titre:"Le relais arrive !",
+        texte:"Ralentissez pour tourner ! Pensez à vous hydrater — Avec vos 5€,commandez une boisson bien fraîche 😄💧. Et pensez à la photo preuve !",
+      }
+    },
+    points:0,
+    interlude:true
+  },
+
+  // ── M3 : MONTAGNE DES SINGES ────────────────
+  {
+    id:"m3", num:3,
+    couleur:"#2ab06a",
+    titre:"Mission 4",
+    sousTitre:"Arrêtez vos singeries ! 🐒",
+    texte:"Vous y êtes presque. Mets tes baskets, chouette c'est sympa tu verras ! Arrêtez-vous sur le parking, à la barrière, faites 33 pas et scannez le QR code.",
+    tts:"Mission quatre ! Malin comme un singe, tu deviendras ! ",
+      action:{
+      type:"qr_code_special_singes",
+      valeur:"SINGES",
+      modal:{
+        ico:"🌊",
+        titre:"Arrêtez tout, il fait trop chaud !",
+        texte:"Vous êtes fou ! Il fait trop chaud… Alors prenez une photo avec votre plus jolie grimace et retournez en voiture et venez vous rafraîchir — vous avez votre maillot ! Mise à l'eau pour bientôt… reprenez la route vers les PK 17 ! 🩱",
+      }
+    },
+    points:150
+  },
+
+  // ── M4 : CAMP MARIPAS ───────────────────────
+  {
+    id:"m4", num:4,
+    couleur:"#e8a020",
+    titre:"Avant-dernière étape",
+    sousTitre:"Crick crick… 700 m et nous voilà ! 🌊",
+    texte:"Vous approchez du but ! Continuez encore un petit moment sur la route…",
+    tts:"Presque arrivés ! La crique est toute proche. Encore 700 mètres !",
+    action:{
+      type:"geofence_puis_modal",
+      lat:5.04308, lon:-52.68989, rayonM:40,
+      modal:{
+        ico:"😄",
+        titre:"Dommage, c'est pas là !",
+        texte:"ET non 😉 Ce n'est pas un MARiage 😄 Continuez tout droit et vous verrez… encore une crique et nous voilà !"
+      }
+    },
+    points:0,
+    interlude:true
+  },
+
+  // ── ARRIVÉE : CRIQUE PK SARAMAKA ────────────
+  {
+    id:"m5", num:5,
+    couleur:"#1a7a4a",
+    titre:"🏁 Arrivée !",
+    sousTitre:"Crique Parforce",
+    texte:"Vous approchez ...! Encore quelques mètres…",
+    tts:"Vous y êtes presque ! Dernière étape de l'aventure, trouver une place pour se garer...",
+    action:{
+      type:"geofence_victoire",
+      lat:5.0367, lon:-52.6905, rayonM:50,
+      modal:{
+        ico:"🎉",
+        titre:"YES ! BRAVO !",
+        texte:"YES BRAVO — REGARDEZ ON VOUS VOIT, ON EST JUSTE LÀ 😄🎉"
+      }
+    },
+    points:200
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════════════
+let S = { idx:0, score:0, gpsId:null, pos:null, actionFaite:false, qrActionModalCb:null };
+
+// ═══════════════════════════════════════════════
+//  HAVERSINE
+// ═══════════════════════════════════════════════
+function dist(a,b,c,d){
+  const R=6371000,dL=(c-a)*Math.PI/180,dO=(d-b)*Math.PI/180;
+  const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+// ═══════════════════════════════════════════════
+//  TTS
+// ═══════════════════════════════════════════════
+function lire(t){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang='fr-FR';u.rate=0.9;u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+// ═══════════════════════════════════════════════
+//  NORMALISATION
+// ═══════════════════════════════════════════════
+function norm(s){return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]/g,'');}
+
+// ═══════════════════════════════════════════════
+//  ÉCRANS
+// ═══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════
+function ouvrirModal(id,ico,titre,texte,btnTxt,cb){
+  document.getElementById('ma-ico').textContent=ico||'📍';
+  document.getElementById('ma-titre').textContent=titre||'';
+  document.getElementById('ma-texte').textContent=texte||'';
+  const btn=document.getElementById('ma-btn');
+  btn.textContent=btnTxt||'OK, on continue !';
+  btn.onclick=()=>{ fermerModal('modal-action'); if(cb)cb(); };
+  document.getElementById('modal-action').classList.add('show');
+  lire(texte);
+}
+
+function fermerModal(id){ document.getElementById(id).classList.remove('show'); }
+
+function ouvrirModalQRAction(ico,titre,texte,cb){
+  document.getElementById('mqa-ico').textContent=ico||'✅';
+  document.getElementById('mqa-titre').textContent=titre||'';
+  document.getElementById('mqa-texte').textContent=texte||'';
+  S.qrActionModalCb=cb;
+  document.getElementById('modal-qr-action').classList.add('show');
+  lire(texte);
+}
+
+function fermerModalQRAction(){
+  fermerModal('modal-qr-action');
+  if(S.qrActionModalCb){ S.qrActionModalCb(); S.qrActionModalCb=null; }
+}
+
+// ═══════════════════════════════════════════════
+//  SOS
+// ═══════════════════════════════════════════════
+function confirmerSOS(){ document.getElementById('modal-sos').classList.add('show'); }
+function activerSOS(){
+  fermerModal('modal-sos');
+  passerSuivante();
+}
+
+// ═══════════════════════════════════════════════
+//  DÉMARRAGE
+// ═══════════════════════════════════════════════
+function demarrer(){
+  S={idx:0,score:0,gpsId:null,pos:null,actionFaite:false,qrActionModalCb:null};
+  showScreen('jeu');
+  buildDots();
+  afficherMission(0);
+  startGPS();
+}
+
+function buildDots(){
+  const c=document.getElementById('pg-dots');
+  c.innerHTML='';
+  MISSIONS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot';d.id='dot-'+i;
+    c.appendChild(d);
+  });
+}
+
+function majProg(){
+  const pct=Math.round((S.idx/Math.max(MISSIONS.length-1,1))*100);
+  document.getElementById('pg-fill').style.width=pct+'%';
+  const m=MISSIONS[S.idx];
+  document.getElementById('lbl-etape').textContent=m?m.titre:'';
+  MISSIONS.forEach((_,i)=>{
+    const d=document.getElementById('dot-'+i);
+    if(!d)return;
+    d.className='dot'+(i<S.idx?' done':i===S.idx?' active':'');
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  GPS
+// ═══════════════════════════════════════════════
+function startGPS(){
+  if(!navigator.geolocation)return;
+  S.gpsId=navigator.geolocation.watchPosition(
+    p=>{S.pos={lat:p.coords.latitude,lon:p.coords.longitude};majGPSUI();checkGeofence();},
+    e=>console.warn(e.message),
+    {enableHighAccuracy:true,maximumAge:3000,timeout:10000}
+  );
+}
+
+function checkGeofence(){
+  if(!S.pos||S.actionFaite)return;
+  const m=MISSIONS[S.idx];
+  if(!m||!m.action)return;
+  const a=m.action;
+  if(a.type==='geofence_puis_modal'||a.type==='geofence_victoire'){
+    const d=dist(S.pos.lat,S.pos.lon,a.lat,a.lon);
+    majGPSBadge(d,a.rayonM);
+    if(d<=a.rayonM&&!S.actionFaite){
+      S.actionFaite=true;
+      if(a.type==='geofence_victoire'){
+        ouvrirModal('modal-action',a.modal.ico,a.modal.titre,a.modal.texte,'🎉 Voir le message final !',()=>afficherVictoire());
+      } else {
+        ouvrirModal('modal-action',a.modal.ico,a.modal.titre,a.modal.texte,'OK, on continue !',()=>passerSuivante());
+      }
+    }
+  }
+}
+
+function majGPSUI(){
+  if(!S.pos)return;
+  const m=MISSIONS[S.idx];
+  if(!m||!m.action)return;
+  const a=m.action;
+  if(!a.lat)return;
+  const d=dist(S.pos.lat,S.pos.lon,a.lat,a.lon);
+  const el=document.getElementById('dist-val');
+  if(el)el.textContent=d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m';
+  majGPSBadge(d,a.rayonM);
+}
+
+function majGPSBadge(d,r){
+  const el=document.getElementById('gps-status');
+  if(!el)return;
+  if(d<=r){
+    el.className='gps-badge gps-ok';
+    el.innerHTML='<span class="dot-gps"></span> Zone atteinte !';
+  } else {
+    const km=d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m';
+    el.className='gps-badge gps-wait';
+    el.innerHTML='📍 Encore <strong>'+km+'</strong> avant le déclenchement';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  AFFICHAGE MISSION
+// ═══════════════════════════════════════════════
+function afficherMission(idx){
+  S.idx=idx; S.actionFaite=false;
+  majProg();
+  const m=MISSIONS[idx];
+  if(!m)return;
+  document.getElementById('pg-g').textContent=m.titre+' en cours';
+
+  const c=document.getElementById('content-jeu');
+  c.innerHTML='';
+
+  // ── Distance card (si géofence) ──
+  const a=m.action;
+  if(a&&a.lat){
+    const dc=document.createElement('div');
+    dc.className='dist-card';
+    dc.innerHTML='<div class="dist-ico">📡</div><div><div class="dist-val" id="dist-val">—</div><div class="dist-lbl">Distance GPS jusqu\'au point (live)</div></div>';
+    c.appendChild(dc);
+  }
+
+  // ── Mission card ──
+  const card=document.createElement('div');
+  card.className='mission-card';
+
+  let bodyHTML='<div class="mc-texte">'+m.texte+'</div>';
+
+  // Selon le type d'action
+  if(a){
+    switch(a.type){
+      case 'geofence_puis_modal':
+      case 'geofence_victoire':
+        bodyHTML+=`<div id="gps-status" class="gps-badge gps-wait">📍 Approchez-vous du point…</div>`;
+        break;
+
+      case 'qr_code':
+        bodyHTML+=`
+          <div class="input-section">
+            <button class="btn btn-qr" onclick="toggleQR()">📷 Scanner le QR Code</button>
+            <div class="qr-scanner" id="qr-scanner">
+              <div class="qr-frame"><div class="qr-line"></div></div>
+              <div class="qr-lbl">Pointez vers le QR Code</div>
+            </div>
+            <div class="qr-manual" id="qr-manual">
+              <div class="input-lbl" style="margin-top:8px">Ou saisir le code :</div>
+              <div class="input-row">
+                <input type="text" id="qr-input" class="mot-input" style="font-size:13px" placeholder="CODE…"
+                  onkeydown="if(event.key==='Enter')soumettreQR(${idx})">
+                <button class="btn-ok btn" onclick="soumettreQR(${idx})" style="width:auto;margin-top:0">→</button>
+              </div>
+            </div>
+          </div>`;
+        break;
+
+      case 'qr_code_special_singes':
+        bodyHTML+=`
+          <div style="margin-top:12px;background:#fff3dc;border-radius:10px;padding:12px;font-size:13px;color:#7a4e00;line-height:1.5">
+            🎵 Musique de l'étape :<br>
+            <a href="https://www.youtube.com/watch?v=ZdT3A0sg_bw" style="color:var(--bleu);font-weight:700" target="_blank">▶ Ouvrir dans YouTube</a>
+          </div>
+          <div class="input-section">
+            <button class="btn btn-qr" onclick="toggleQR()">📷 Scanner le QR Code (33 pas depuis la barrière)</button>
+            <div class="qr-scanner" id="qr-scanner">
+              <div class="qr-frame"><div class="qr-line"></div></div>
+              <div class="qr-lbl">Pointez vers le QR Code</div>
+            </div>
+            <div class="qr-manual" id="qr-manual">
+              <div class="input-lbl" style="margin-top:8px">Ou saisir le code :</div>
+              <div class="input-row">
+                <input type="text" id="qr-input" class="mot-input" style="font-size:13px" placeholder="CODE…"
+                  onkeydown="if(event.key==='Enter')soumettreQR(${idx})">
+                <button class="btn-ok btn" onclick="soumettreQR(${idx})" style="width:auto;margin-top:0">→</button>
+              </div>
+            </div>
+          </div>`;
+        break;
+    }
+  }
+
+  card.innerHTML=`
+    <div class="mc-header">
+      <div class="mc-num" style="background:${m.couleur}">${typeof m.num==='number'?m.num:'→'}</div>
+      <div>
+        <div class="mc-titre">${m.sousTitre}</div>
+      </div>
+    </div>
+    <div class="mc-body">${bodyHTML}</div>`;
+  c.appendChild(card);
+
+  // ── Coords debug ──
+  if(a&&a.lat){
+    const cb=document.createElement('div');
+    cb.className='coords-box';
+    cb.innerHTML='<span>GPS : '+a.lat.toFixed(5)+', '+a.lon.toFixed(5)+'</span><span>Rayon : '+(a.rayonM||'—')+' m</span>';
+    c.appendChild(cb);
+  }
+
+  // ── Bouton audio ──
+  const ab=document.createElement('button');
+  ab.className='btn btn-audio';
+  ab.style.marginTop='4px';
+  ab.innerHTML='🔊 Écouter la mission';
+  ab.onclick=()=>lire(m.tts||m.texte);
+  c.appendChild(ab);
+
+  setTimeout(()=>lire(m.tts||m.texte),500);
+  majGPSUI();
+}
+
+// ═══════════════════════════════════════════════
+//  QR SCAN
+// ═══════════════════════════════════════════════
+function toggleQR(){
+  document.getElementById('qr-scanner').classList.toggle('show');
+  document.getElementById('qr-manual').classList.add('show');
+}
+
+function soumettreQR(idx){
+  const inp=document.getElementById('qr-input');
+  const m=MISSIONS[idx];
+  const val=inp.value.toUpperCase().trim();
+  if(val===m.action.valeur){
+    inp.classList.add('ok');
+    S.actionFaite=true;
+    S.score+=m.points;
+    document.getElementById('pg-d').textContent=S.score+' pts';
+    const mod=m.action.modal;
+    ouvrirModalQRAction(mod.ico,mod.titre,mod.texte,()=>passerSuivante());
+  } else {
+    inp.classList.add('err'); inp.value='';
+    setTimeout(()=>inp.classList.remove('err'),500);
+    lire('Code incorrect, cherchez encore !');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function passerSuivante(){
+  const suivant=S.idx+1;
+  if(suivant>=MISSIONS.length){ afficherVictoire(); return; }
+  afficherMission(suivant);
+}
+
+// ═══════════════════════════════════════════════
+//  VICTOIRE
+// ═══════════════════════════════════════════════
+function afficherVictoire(){
+  if(S.gpsId)navigator.geolocation.clearWatch(S.gpsId);
+  showScreen('victoire');
+  lire('YES ! BRAVO ! Vous avez traversé la forêt guyanaise et atteint la Crique Parforce! Regardez autour de vous !');
+}
+
+function reinit(){ showScreen('home'); }
+
+// ── Service Worker ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

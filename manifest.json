@@ -1,0 +1,17 @@
+{
+  "name": "Aventures Défis Guyane",
+  "short_name": "Aventures Défis",
+  "description": "Chasse au trésor Kourou → Crique PK Saramaka",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0d2b1a",
+  "theme_color": "#1a7a4a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231a7a4a'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='120'%3E🌿%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
